@@ -1,0 +1,32 @@
+IN 10H ; command in order to have access to the whole memory
+MVI A,00H ; initialize Á to 00H
+MVI E,08H ; initialize E to 8
+LXI B,0000H ; initialize the counter of 1s to 0
+LXI H,0900H ; load the address in the double register HL
+KATAXWRHSH:
+	CPI 80H ; compare it with 128 and if it is equal jump to the end
+	JZ END_LABEL ; jump to the end label
+	MOV M,A ; move the content of A to the memory location
+	JMP COUNT_ACES ; jump to the counting subroutine
+COUNT_ACES:
+	RRC ; rotate right through carry
+	JC INCREMENT_BC ; jump if carry is set
+	JMP CONTINUE_2 ; jump to the next step
+INCREMENT_BC:
+	INX B ; increment B register
+	JMP CONTINUE_2 ; jump to the next step
+CONTINUE_1:	
+	MVI E,08H ; we reset E to 8 for the next iteration 
+	INX H ; move one position "down" in memory
+	INR A ; increment the value of D
+	JMP KATAXWRHSH ; loop until all the numbers are placed correctly
+CONTINUE_2:	
+	DCR E ; decrement E
+	JNZ COUNT_ACES ; if not zero, continue counting aces
+	JMP CONTINUE_1 ; if zero, continue placing numbers
+END_LABEL:
+	MOV A,B
+	STA 0B00H
+	MOV A,C
+	STA 0B01H
+	END
