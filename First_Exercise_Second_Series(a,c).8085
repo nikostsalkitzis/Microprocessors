@@ -1,0 +1,26 @@
+IN 10H ; command in order to have access to the whole memory
+MVI A,00H ; initialize Á to 00H
+MVI D,00H ; initialize the counter to 0
+LXI H,0900H ; load the address in the double register HL
+KATAXWRHSH:
+	CPI 80H ; compare it with 128 and if it is equal jump to the end
+	JZ END_LABEL ; jump to the end label
+	CPI 10H ; we check if the number is more or equal to 10H
+	JZ INCR_D ; if it is equal to 10H we increment the counter
+	JNC CHECK ; if it is more we keep on checking
+CONTINUE:	
+	MOV M,A ; move the content of A to the memory location
+	INX H ; move one position "down" in memory
+	INR A ; increment the value of D
+	JMP KATAXWRHSH ; loop until all the numbers are placed correctly
+INCR_D:
+	INR D ; increment D
+	JMP CONTINUE	; move on with the next inputs
+CHECK:
+	CPI 60H ; we check if it less or equal to 60H and if so we increase D
+	JZ INCR_D
+	JC INCR_D
+END_LABEL:
+	MOV A,D ; we save the content of D into the accumulator 
+	STA 0B00H ; we save the count into 0B00 in order to see the result
+	END
