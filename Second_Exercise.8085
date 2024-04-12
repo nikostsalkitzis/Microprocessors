@@ -1,0 +1,47 @@
+IN 10H
+LXI B,01F4H ; BC has the value of 500 because so are the ms of delay we want
+MVI A,FEH ; LED starting position(11111110 for negative logic)
+
+PRINT_RESULT:
+STA 3000H
+MOV D,A ; D contains previous LED position
+
+START:
+	CALL DELB ; 0.5s delay
+	LDA 2000H ; load the input port to the accumulator
+	ANI 03H ; we only keep the last two digits
+	CPI 01H ; we see if the values of them are 01 so we must perform the desired operation
+	JZ SHIFT_LEFT ; we move to the move left label
+RETURN:
+	CPI 00H ; we check if the two last LSBs are 00 and if so
+	JZ CYCLE_LEFT ; we should perform the cycle left
+	MVI A,FEH ; turn on LED 0
+	STA 3000H ; if not we simply set the LED 0 ON and 
+	JMP START ; jump to start 
+
+CYCLE_LEFT:
+	MOV A,D ; A now contains previous LED position
+	RLC ; we just perform a left shifting in order to perform the cycle
+	JMP PRINT_RESULT ; we print the result 
+
+SHIFT_LEFT:
+	MOV A,D ; the accumulator has now the previous position of the led
+	CPI 7FH ; we check if the led has reached the leftmost led
+	JZ SHIFT_RIGHT ; and if it does we should move right 
+	RLC ; else we perform a left shifting to the previous led in order to move one position to the left
+	JMP PRINT_RESULT ; we print the result in the output port
+
+SHIFT_RIGHT:
+	MOV A,D ; as always we have the previous led in the accumulator
+	CPI FEH ; proportionally to the previous case we check if we are in the rightmost led
+	JZ SHIFT_LEFT ; if we do we should move to the opposite direction
+	RRC ; if not we should moove the led one position to the right 
+	STA 3000H ; we save the content of the accumulator in the output port
+	MOV D,A ; again the D has the previous led
+	CALL DELB ; 0.5s delay
+	LDA 2000H ; we load the input port to the accumulator
+	ANI 03H ; nullifies all bits except the 2 LSBs
+	CPI 01H ; we recompare the LSBs with 01H
+	JZ SHIFT_RIGHT 
+	JMP RETURN
+END

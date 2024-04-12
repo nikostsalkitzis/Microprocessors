@@ -1,0 +1,34 @@
+ARXH:
+	LDA 2000H ;we load the input to the accumulator
+	CPI C7H ; we compare it with 199 and if it larger than that	
+	JNC CASE_1 ; we jump into the first case handling
+	CPI 63H ; if it is not then we check if it is greater than 99
+	JNC CASE_2 ; if it is we jump in the second case
+	MVI B,FFH ; else we have the third case where the number is <99
+DECA:
+	INR B ; the assembly code is the same with the problem in page 84
+	SUI 0AH ; but the only difference is that we save the units
+	JNC DECA ; and tens in the same register
+	ADI 0AH ; to do so we save the units into reg C
+	MOV C,A ; and the tens to Accumulator like done in the next command
+	MOV A,B ; Then in order to have them in the MSBs we shift them
+	RLC ; four times to the left 
+	RLC
+	RLC
+	RLC
+	ADD C ; and then add the units
+	CMA ; we have the complement of A beacuse the LEDS are of negative logic
+	STA 3000H ; we save the result and then we jump into the ARXH
+	JMP ARXH
+
+CASE_1:
+	MVI A,FFH ; we set all the LEDS and we complement them to be properly shown
+	CMA
+	STA 3000H
+	JMP ARXH
+CASE_2:
+	SUI 64H ; we remove 100 from the final result
+	CMA
+	STA 3000H
+	JMP ARXH
+END
